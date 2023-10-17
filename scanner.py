@@ -13,7 +13,10 @@ while True:
         print(packet.time, packet.RSSI, end=" ")
         if ble:
             dest = hexAddr(ble.scanAddress) if ble.scanAddress else "Broadcast"
-            print("type:", ble.advType, "src:", hexAddr(ble.advAddress), "dest:", dest)
+            print("type:", ble.advType, "src:", hexAddr(ble.advAddress), "dest:", dest, end=" ")
+            if ble.name != "\"\"":
+                print("name:", ble.name)
+            print("")
         else:
             print("")
         #print(dir(packet))
