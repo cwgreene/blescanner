@@ -51,7 +51,8 @@ def display_buckets(buckets):
         bucket = buckets[addr]
         print(f"{addr}: {bucket.count}/ {bucket.avg_rssi} {bucket.name}",end="")
         print(" "*20)
-    print(f"\x1b[{length}A",end="")
+    if len(buckets) > 0:
+        print(f"\x1b[{length}A",end="")
 
 def get_default_device():
     # TODO: Make this autodectable and manually configurable
