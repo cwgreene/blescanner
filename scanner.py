@@ -6,6 +6,11 @@ import SnifferAPI.Types as Types
 import platform
 #def list_silicon_devices():
 
+class Bucket:
+    def __init__(self):
+        self.count = 0
+        self.avg_rssi = 0
+        self.last_seen = 0
 
 def hexAddr(blist):
     return ":".join([hex(i)[2:] for i in blist])
@@ -23,6 +28,30 @@ def packet_to_string(packet):
             if ble.name[1:-1] != "":
                 res += f" name: '{ble.name[1:-1]}'"
         return res
+
+def update_buckets(packet, buckets):
+    ble = packet.blePacket
+    if not ble:
+        return
+    addr = hexAddr(ble.advAddress)
+    if addr not in buckets:
+        bucket = Bucket()
+        buckets[addr] = bucket
+    bucket = buckets[addr]
+    bucket.count += 1
+    bucket.last_seen = packet.time
+    bucket.name = ble.name
+    # TODO: make average decay with time
+    bucket.avg_rssi = ((bucket.avg_rssi*(bucket.count-1)) + packet.RSSI)/bucket.count
+
+def display_buckets(buckets):
+    #print("===")
+    length = min(len(buckets), 10)
+    for addr in reversed(sorted(buckets, key= lambda b: buckets[b].count)[-10:]):
+        bucket = buckets[addr]
+        print(f"{addr}: {bucket.count}/ {bucket.avg_rssi} {bucket.name}",end="")
+        print(" "*20)
+    print(f"\x1b[{length}A",end="")
 
 def get_default_device():
     # TODO: Make this autodectable and manually configurable
@@ -49,9 +78,17 @@ def main():
 
     sniffer = Sniffer.Sniffer(options.device)
     sniffer.start()
+    buckets = {}
 
-    while True:
-        for packet in sniffer.getPackets():
-            print(packet_to_string(packet))
-        time.sleep(.1) # really? is this *really* the best way?
+    try:
+        while True:
+            for packet in sniffer.getPackets():
+                if options.buckets:
+                    update_buckets(packet, buckets)
+                    display_buckets(buckets)
+                else:
+                    print(packet_to_string(packet))
+            time.sleep(.1) # really? is this *really* the best way?
+    except:
+        print("\n"*min(len(buckets),10))
 main()
