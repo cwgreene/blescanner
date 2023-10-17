@@ -4,6 +4,7 @@ import time
 from SnifferAPI import Sniffer
 import SnifferAPI.Types as Types
 import platform
+import math
 #def list_silicon_devices():
 
 class Bucket:
@@ -42,7 +43,7 @@ def update_buckets(packet, buckets):
     bucket.last_seen = packet.time
     bucket.name = ble.name
     # TODO: make average decay with time
-    bucket.avg_rssi = ((bucket.avg_rssi*(bucket.count-1)) + packet.RSSI)/bucket.count
+    bucket.avg_rssi = (((bucket.avg_rssi*(bucket.count-1)) + packet.RSSI)/bucket.count)
 
 def display_buckets(buckets):
     #print("===")
@@ -90,6 +91,9 @@ def main():
                 else:
                     print(packet_to_string(packet))
             time.sleep(.1) # really? is this *really* the best way?
-    except:
+    except Exception as e:
+        print("\n"*min(len(buckets),10))
+        raise(e)
+    except KeyboardInterrupt:
         print("\n"*min(len(buckets),10))
 main()
