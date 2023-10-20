@@ -66,8 +66,10 @@ def get_default_device():
         # Maybe 'udevadm info --name=/dev/ttyUSB0 --attribute-walk'?
         # for each ttyUSB entry?
         device_name = "/dev/ttyUSB0"
+    elif platform.system() == "Darwin":
+        device_name = "/dev/cu.usbserial-110"
     else:
-        raise("I have no idea what OS this is:", platform.system())
+        raise Exception("I have no idea what OS this is:", platform.system())
     return device_name
 
 def main():
