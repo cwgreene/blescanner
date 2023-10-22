@@ -56,7 +56,7 @@ class Packet:
         if not ble:
             return {"rssi": self.packet.RSSI}
         js = {
-            "timestamp": packet.timestamp,
+            "timestamp": packet.time,
             "rssi": packet.RSSI,
             "src": hexAddr(ble.advAddress),
             "type": TYPES[ble.type],
